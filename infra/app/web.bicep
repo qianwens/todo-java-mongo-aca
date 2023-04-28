@@ -7,8 +7,8 @@ param applicationInsightsName string
 param containerAppsEnvironmentName string
 param containerRegistryName string
 param imageName string = ''
-param keyVaultName string
 param serviceName string = 'web'
+param cosmosId string
 
 module app '../core/host/container-app.bicep' = {
   name: '${serviceName}-container-app-module'
@@ -18,6 +18,11 @@ module app '../core/host/container-app.bicep' = {
     tags: union(tags, { 'azd-service-name': serviceName })
     containerAppsEnvironmentName: containerAppsEnvironmentName
     containerRegistryName: containerRegistryName
+    service:[
+      {
+        serviceId: cosmosId
+      }
+    ]
     env: [
       {
         name: 'REACT_APP_APPLICATIONINSIGHTS_CONNECTION_STRING'
@@ -33,17 +38,12 @@ module app '../core/host/container-app.bicep' = {
       }
     ]
     imageName: !empty(imageName) ? imageName : 'nginx:latest'
-    keyVaultName: keyVault.name
     targetPort: 80
   }
 }
 
 resource applicationInsights 'Microsoft.Insights/components@2020-02-02' existing = {
   name: applicationInsightsName
-}
-
-resource keyVault 'Microsoft.KeyVault/vaults@2022-07-01' existing = {
-  name: keyVaultName
 }
 
 output SERVICE_WEB_IDENTITY_PRINCIPAL_ID string = app.outputs.identityPrincipalId
