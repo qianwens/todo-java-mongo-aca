@@ -6,10 +6,10 @@ param containerAppsEnvironmentName string
 param containerName string = 'main'
 param containerRegistryName string
 param env array = []
+param service array = []
 param external bool = true
 param imageName string
-param keyVaultName string = ''
-param managedIdentity bool = !empty(keyVaultName)
+param managedIdentity bool = !empty(service)
 param targetPort int = 80
 
 @description('CPU cores allocated to a single container instance, e.g. 0.5')
@@ -47,6 +47,7 @@ resource app 'Microsoft.App/containerApps@2022-03-01' = {
       ]
     }
     template: {
+      serviceBinds: service
       containers: [
         {
           image: imageName
